@@ -20,8 +20,8 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='odom_bridge',
-        arguments=['/body/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry'],
-        #remappings=[('/model/x500_mono_cam/odometry', '/body/odom')],
+        arguments=['/model/x500_mono_cam/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry'],
+        remappings=[('/model/x500_mono_cam/odometry', '/body/odom')],
         output='screen'
     )
     
@@ -29,18 +29,17 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='tf_bridge',
-        arguments=['/tf_gazebo@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'],
-        #remappings=[('/model/x500_mono_cam_0/pose', '/tf_gazebo')],
+        arguments=['/model/x500_mono_cam_0/pose@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'],
+        remappings=[('/model/x500_mono_cam_0/pose', '/tf_gazebo')],
         output='screen'
     )
     
-    # Bridge left camera image
     left_image_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='left_image_bridge',
-        arguments=['/front_stereo_camera/left/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'],
-        #remappings=[( '/front_stereo_camera/left/image_rect_color')],
+        arguments=['front_stereo_camera/left/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'],
+        remappings=[('front_stereo_camera/left/image_raw', '/front_stereo_camera/left/image_rect_color')],
         output='screen'
     )
     
@@ -49,8 +48,8 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='right_image_bridge',
-        arguments=['/front_stereo_camera/right/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'],
-        #remappings=[('/front_stereo_camera/right/image_rect_color')],
+        arguments=['front_stereo_camera/right/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'],
+        remappings=[('front_stereo_camera/right/image_raw','/front_stereo_camera/right/image_rect_color')],
         output='screen'
     )
     
@@ -59,8 +58,8 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='left_info_bridge',
-        arguments=['/front_stereo_camera/left/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
-        #remappings=[('/front_stereo_camera/left/camera_info')],
+        arguments=['front_stereo_camera/left/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
+        remappings=[('front_stereo_camera/left/camera_info','/front_stereo_camera/left/camera_info')],
         output='screen'
     )
     
@@ -69,11 +68,10 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='right_info_bridge',
-        arguments=['/front_stereo_camera/right/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
-        #remappings=[('/front_stereo_camera/right/camera_info')],
+        arguments=['front_stereo_camera/right/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
+        remappings=[('front_stereo_camera/right/camera_info','/front_stereo_camera/right/camera_info')],
         output='screen'
     )
-    
     # Bridge clock
     clock_bridge = Node(
         package='ros_gz_bridge',

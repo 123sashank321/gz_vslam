@@ -4,7 +4,6 @@
     <pose>0 0 .24 0 0 0</pose>
     <self_collide>false</self_collide>
     <static>false</static>
-
     <!-- ==================== BASE LINK ==================== -->
     <link name="base_link">
       <inertial>
@@ -389,7 +388,7 @@
       <parent>base_link</parent>
       <child>body</child>
     </joint>
-
+    
     <!-- ==================== STEREO CAMERA OPTICAL FRAMES ==================== -->
     <!-- Left Camera Optical Frame -->
     <link name="front_stereo_camera_left_optical">

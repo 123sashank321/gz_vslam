@@ -2,6 +2,7 @@
 """
 TF Tree Fixer - Converts Gazebo flat TF to clean hierarchical tree
 Removes Gazebo model prefixes (e.g., "x500_mono_cam_0/") and uses /clock for timestamps
+Adds static camera frames to match camera_info frame_ids.
 """
 
 import rclpy
@@ -55,7 +56,15 @@ class TFTreeFixer(Node):
             'rotor3': 'body',
         }
 
-        # Subscriber to Gazebo TF (from bridge)
+        # Camera info frame mapping (static frames to match camera_info)
+        self.camera_frames = {
+            'x500_mono_cam_0/front_stereo_camera_left_optical/left_camera': 
+                'x500_mono_cam_0/front_stereo_camera_left_optical',
+            'x500_mono_cam_0/front_stereo_camera_right_optical/right_camera': 
+                'x500_mono_cam_0/front_stereo_camera_right_optical'
+        }
+
+        # Subscribers
         self.tf_sub = self.create_subscription(
             TFMessage,
             '/tf_gazebo',
@@ -63,7 +72,6 @@ class TFTreeFixer(Node):
             self.tf_qos
         )
 
-        # Subscriber to simulation clock
         self.clock_sub = self.create_subscription(
             Clock,
             '/clock',
@@ -71,15 +79,12 @@ class TFTreeFixer(Node):
             10
         )
 
-        # Publishers for corrected TF
+        # Publishers
         self.tf_pub = self.create_publisher(TFMessage, '/tf', self.tf_qos)
         self.tf_static_pub = self.create_publisher(TFMessage, '/tf_static', self.static_qos)
 
-        # Timer to republish fixed TF at 50 Hz
         self.timer = self.create_timer(0.02, self.publish_fixed_tf)
-
-        # Timer to republish static transforms periodically
-        self.static_timer = self.create_timer(1.0, self.publish_static_transforms)
+        self.static_timer = self.create_timer(1.0, self.publish_static_camera_frames)
 
         self.get_logger().info('TF Tree Fixer started — using /clock and prefix stripping enabled.')
 
@@ -107,58 +112,47 @@ class TFTreeFixer(Node):
             
             self.latest_transforms[clean_child] = cleaned_transform
 
-    def publish_static_transforms(self):
-        """Publish static odom frame"""
-        if self.sim_time is None:
-            # Use current node time if sim time not available yet
-            current_time = self.get_clock().now().to_msg()
-        else:
-            current_time = self.sim_time
-
-        static_tf = TFMessage()
-        
-        # Static identity transform for odom (root frame)
-        t = TransformStamped()
-        t.header.stamp = current_time
-        t.header.frame_id = 'map'
-        t.child_frame_id = 'odom'
-        t.transform.translation.x = 0.0
-        t.transform.translation.y = 0.0
-        t.transform.translation.z = 0.0
-        t.transform.rotation.x = 0.0
-        t.transform.rotation.y = 0.0
-        t.transform.rotation.z = 0.0
-        t.transform.rotation.w = 1.0
-        
-        static_tf.transforms.append(t)
-        self.tf_static_pub.publish(static_tf)
-
     def publish_fixed_tf(self):
         """Publish TF with clean hierarchy"""
         if not self.latest_transforms:
             return
         
-        # Use sim time if available, otherwise use node time
-        if self.sim_time is None:
-            current_time = self.get_clock().now().to_msg()
-        else:
-            current_time = self.sim_time
-
+        current_time = self.sim_time if self.sim_time else self.get_clock().now().to_msg()
         tf_msg = TFMessage()
         
         for child_frame, parent_frame in self.tf_tree.items():
             if child_frame in self.latest_transforms:
                 transform = copy.deepcopy(self.latest_transforms[child_frame])
-                
-                # Update with correct parent-child relationship and timestamp
                 transform.header.stamp = current_time
                 transform.header.frame_id = parent_frame
                 transform.child_frame_id = child_frame
-                
                 tf_msg.transforms.append(transform)
         
         if tf_msg.transforms:
             self.tf_pub.publish(tf_msg)
+
+    def publish_static_camera_frames(self):
+        """Publish static frames for camera_info alignment"""
+        current_time = self.sim_time if self.sim_time else self.get_clock().now().to_msg()
+        static_tf_msg = TFMessage()
+        
+        for child_frame, parent_frame in self.camera_frames.items():
+            t = TransformStamped()
+            t.header.stamp = current_time
+            t.header.frame_id = parent_frame
+            t.child_frame_id = child_frame
+            # Identity transform: camera frame coincides with optical link
+            t.transform.translation.x = 0.0
+            t.transform.translation.y = 0.0
+            t.transform.translation.z = 0.0
+            t.transform.rotation.x = 0.0
+            t.transform.rotation.y = 0.0
+            t.transform.rotation.z = 0.0
+            t.transform.rotation.w = 1.0
+            static_tf_msg.transforms.append(t)
+        
+        if static_tf_msg.transforms:
+            self.tf_static_pub.publish(static_tf_msg)
 
 
 def main(args=None):
