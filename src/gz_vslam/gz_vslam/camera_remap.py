@@ -134,6 +134,34 @@ class CameraFixer(Node):
         fixed_msg.d = msg.d
         fixed_msg.k = msg.k
         fixed_msg.r = msg.r
+        fixed_msg.binning_x = msg.binning_x
+        fixed_msg.binning_y = msg.binning_y
+        fixed_msg.roi = msg.roi
+
+        # ===== Override the projection matrix manually =====
+        fx = 381.3611
+        fy = 381.3611
+        cx = 320.0
+        cy = 180.0
+        # Left camera (no baseline offset)
+        fixed_msg.p = [
+            fx, 0.0, cx, 0.0,
+            0.0, fy, cy, 0.0,
+            0.0, 0.0, 1.0, 0.0
+        ]
+        self.left_info_pub.publish(fixed_msg)
+    
+    def left_info_callback_1(self, msg: CameraInfo):
+        """Process and republish left camera info with clean frame_id"""
+        fixed_msg = CameraInfo()
+        fixed_msg.header = msg.header
+        fixed_msg.header.frame_id = self.strip_prefix(msg.header.frame_id)
+        fixed_msg.height = msg.height
+        fixed_msg.width = msg.width
+        fixed_msg.distortion_model = msg.distortion_model
+        fixed_msg.d = msg.d
+        fixed_msg.k = msg.k
+        fixed_msg.r = msg.r
         fixed_msg.p = msg.p
         fixed_msg.binning_x = msg.binning_x
         fixed_msg.binning_y = msg.binning_y
@@ -157,6 +185,37 @@ class CameraFixer(Node):
         self.right_image_pub.publish(fixed_msg)
     
     def right_info_callback(self, msg: CameraInfo):
+        """Process and republish right camera info with clean frame_id"""
+        fixed_msg = CameraInfo()
+        fixed_msg.header = msg.header
+        fixed_msg.header.frame_id = self.strip_prefix(msg.header.frame_id)
+        fixed_msg.height = msg.height
+        fixed_msg.width = msg.width
+        fixed_msg.distortion_model = msg.distortion_model
+        fixed_msg.d = msg.d
+        fixed_msg.k = msg.k
+        fixed_msg.r = msg.r
+        fixed_msg.binning_x = msg.binning_x
+        fixed_msg.binning_y = msg.binning_y
+        fixed_msg.roi = msg.roi
+
+        # ===== Override the projection matrix manually =====
+        fx = 381.3611
+        fy = 381.3611
+        cx = 320.0
+        cy = 180.0
+        baseline = 0.09  # meters
+        # Right camera (apply baseline offset)
+        fixed_msg.p = [
+            fx, 0.0, cx, -fx * baseline,
+            0.0, fy, cy, 0.0,
+            0.0, 0.0, 1.0, 0.0
+        ]
+
+        self.right_info_pub.publish(fixed_msg)
+
+    
+    def right_info_callback_1(self, msg: CameraInfo):
         """Process and republish right camera info with clean frame_id"""
         fixed_msg = CameraInfo()
         fixed_msg.header = msg.header

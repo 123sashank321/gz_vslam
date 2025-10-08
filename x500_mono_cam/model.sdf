@@ -424,9 +424,9 @@
           </noise>
         </camera>
         <always_on>true</always_on>
-        <update_rate>15.0</update_rate>
+        <update_rate>60.0</update_rate>
         <visualize>true</visualize>
-        <topic>front_stereo_camera/left/image_raw</topic>
+        <topic>left/image_raw</topic>
       </sensor>
     </link>
 
@@ -469,9 +469,9 @@
           </noise>
         </camera>
         <always_on>true</always_on>
-        <update_rate>15.0</update_rate>
+        <update_rate>60.0</update_rate>
         <visualize>true</visualize>
-        <topic>front_stereo_camera/right/image_raw</topic>
+        <topic>right/image_raw</topic>
       </sensor>
     </link>
 
