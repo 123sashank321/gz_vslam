@@ -38,8 +38,8 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='left_image_bridge',
-        arguments=['front_stereo_camera/left/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'],
-        remappings=[('front_stereo_camera/left/image_raw', '/front_stereo_camera/left/image_rect_color')],
+        arguments=['left/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'],
+        #remappings=[('front_stereo_camera/left/image_raw', '/front_stereo_camera/left/image_rect_color')],
         output='screen'
     )
     
@@ -48,8 +48,8 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='right_image_bridge',
-        arguments=['front_stereo_camera/right/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'],
-        remappings=[('front_stereo_camera/right/image_raw','/front_stereo_camera/right/image_rect_color')],
+        arguments=['right/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'],
+        #remappings=[('front_stereo_camera/right/image_raw','/front_stereo_camera/right/image_rect_color')],
         output='screen'
     )
     
@@ -58,8 +58,8 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='left_info_bridge',
-        arguments=['front_stereo_camera/left/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
-        remappings=[('front_stereo_camera/left/camera_info','/front_stereo_camera/left/camera_info')],
+        arguments=['left/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
+        #remappings=[('front_stereo_camera/left/camera_info','/front_stereo_camera/left/camera_info')],
         output='screen'
     )
     
@@ -68,8 +68,8 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='right_info_bridge',
-        arguments=['front_stereo_camera/right/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
-        remappings=[('front_stereo_camera/right/camera_info','/front_stereo_camera/right/camera_info')],
+        arguments=['right/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
+        #remappings=[('front_stereo_camera/right/camera_info','/front_stereo_camera/right/camera_info')],
         output='screen'
     )
     # Bridge clock
@@ -89,6 +89,14 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]  # make sure it uses /clock
     )
     
+    camera_republisher_node = Node(
+        package='gz_vslam',
+        executable='camera_remapper',
+        name='camera_remapper',
+        output='screen',
+        parameters=[{'use_sim_time': True}]  # make sure it uses /clock
+    )
+    
     return LaunchDescription([
         odom_bridge,
         tf_bridge,
@@ -97,5 +105,6 @@ def generate_launch_description():
         left_info_bridge,
         right_info_bridge,
         clock_bridge,
-        tf_republisher_node
+        tf_republisher_node,
+        camera_republisher_node
     ])

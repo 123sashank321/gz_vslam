@@ -35,7 +35,7 @@ class TFTreeFixer(Node):
         # QoS for static TF
         self.static_qos = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
-            durability=DurabilityPolicy.TRANSIENT_LOCAL,
+            durability=DurabilityPolicy.VOLATILE,
             history=HistoryPolicy.KEEP_LAST,
             depth=10
         )
@@ -81,10 +81,10 @@ class TFTreeFixer(Node):
 
         # Publishers
         self.tf_pub = self.create_publisher(TFMessage, '/tf', self.tf_qos)
-        self.tf_static_pub = self.create_publisher(TFMessage, '/tf_static', self.static_qos)
+        #self.tf_static_pub = self.create_publisher(TFMessage, '/tf_static', self.static_qos)
 
         self.timer = self.create_timer(0.02, self.publish_fixed_tf)
-        self.static_timer = self.create_timer(1.0, self.publish_static_camera_frames)
+        #self.static_timer = self.create_timer(1.0, self.publish_static_camera_frames)
 
         self.get_logger().info('TF Tree Fixer started — using /clock and prefix stripping enabled.')
 
@@ -131,28 +131,28 @@ class TFTreeFixer(Node):
         if tf_msg.transforms:
             self.tf_pub.publish(tf_msg)
 
-    def publish_static_camera_frames(self):
-        """Publish static frames for camera_info alignment"""
-        current_time = self.sim_time if self.sim_time else self.get_clock().now().to_msg()
-        static_tf_msg = TFMessage()
+    # def publish_static_camera_frames(self):
+    #     """Publish static frames for camera_info alignment"""
+    #     current_time = self.sim_time if self.sim_time else self.get_clock().now().to_msg()
+    #     static_tf_msg = TFMessage()
         
-        for child_frame, parent_frame in self.camera_frames.items():
-            t = TransformStamped()
-            t.header.stamp = current_time
-            t.header.frame_id = parent_frame
-            t.child_frame_id = child_frame
-            # Identity transform: camera frame coincides with optical link
-            t.transform.translation.x = 0.0
-            t.transform.translation.y = 0.0
-            t.transform.translation.z = 0.0
-            t.transform.rotation.x = 0.0
-            t.transform.rotation.y = 0.0
-            t.transform.rotation.z = 0.0
-            t.transform.rotation.w = 1.0
-            static_tf_msg.transforms.append(t)
+    #     for child_frame, parent_frame in self.camera_frames.items():
+    #         t = TransformStamped()
+    #         t.header.stamp = current_time
+    #         t.header.frame_id = parent_frame
+    #         t.child_frame_id = child_frame
+    #         # Identity transform: camera frame coincides with optical link
+    #         t.transform.translation.x = 0.0
+    #         t.transform.translation.y = 0.0
+    #         t.transform.translation.z = 0.0
+    #         t.transform.rotation.x = 0.0
+    #         t.transform.rotation.y = 0.0
+    #         t.transform.rotation.z = 0.0
+    #         t.transform.rotation.w = 1.0
+    #         static_tf_msg.transforms.append(t)
         
-        if static_tf_msg.transforms:
-            self.tf_static_pub.publish(static_tf_msg)
+    #     if static_tf_msg.transforms:
+    #         self.tf_static_pub.publish(static_tf_msg)
 
 
 def main(args=None):

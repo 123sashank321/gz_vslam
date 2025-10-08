@@ -26,6 +26,7 @@ setup(
     entry_points={
         'console_scripts': [
             'tf_republisher = gz_vslam.tf_republisher:main',
+            'camera_remapper=gz_vslam.camera_remap:main',
         ],
     },
 )
